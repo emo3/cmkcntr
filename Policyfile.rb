@@ -14,3 +14,4 @@ run_list 'cmkpod::default'
 
 # Specify a custom source for a single cookbook:
 cookbook 'cmkpod', path: '.'
+override['cmkpod']['cmk_release'] = '2.1.0p26'
