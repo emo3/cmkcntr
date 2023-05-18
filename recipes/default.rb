@@ -23,7 +23,7 @@ execute 'run-cmk' do
   command "podman container run \
     -e CMK_PASSWORD=\"#{node['cmk']['admin_passwd']}\" \
     -dit \
-    -p 8080:5000 \
+    -p #{node['cmk']['server_port']}:5000 \
     -p 8000:8000 \
     -v dvomon:/omd/sites \
     --name dvomon \
@@ -75,10 +75,11 @@ template '/usr/local/bin/listrulec.sh' do
   variables(
     cmkserver: 'localhost',
     cmksite: node['cmk']['site_name'],
+    cmkport: node['cmk']['server_port'],
     apitoken: node['cmk']['secret']
   )
   sensitive true
-  notifies :run, 'execute[test_api]', :immediately
+  notifies :run, 'execute[test_api]', :delayed
 end
 
 # Test to verify the Checkmk API
