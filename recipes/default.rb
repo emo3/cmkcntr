@@ -9,6 +9,7 @@ package %w(podman jq)
 remote_file "#{Chef::Config[:file_cache_path]}/#{node['cmk']['server_file']}" do
   source "#{node['cmk']['media_url']}/#{node['cmk']['server_file']}"
   mode '0755'
+  ssl_verify_mode :verify_none
   action :create
   notifies :run, 'execute[load-cmk]', :immediately
 end
@@ -23,8 +24,8 @@ execute 'run-cmk' do
   command "podman container run \
     -e CMK_PASSWORD=\"#{node['cmk']['admin_passwd']}\" \
     -dit \
-    -p #{node['cmk']['server_port']}:5000 \
-    -p 8000:8000 \
+    -p #{node['cmk']['listen_port']}:5000 \
+    -p #{node['cmk']['register_port']}:8000 \
     -v dvomon:/omd/sites \
     --name dvomon \
     -v /etc/localtime:/etc/localtime:ro \
@@ -75,7 +76,7 @@ template '/usr/local/bin/listrulec.sh' do
   variables(
     cmkserver: 'localhost',
     cmksite: node['cmk']['site_name'],
-    cmkport: node['cmk']['server_port'],
+    cmkport: node['cmk']['listen_port'],
     apitoken: node['cmk']['secret']
   )
   sensitive true
